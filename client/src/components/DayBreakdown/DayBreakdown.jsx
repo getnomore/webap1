@@ -1,21 +1,19 @@
 import { useState, useEffect } from 'react';
 import HourBar from './HourBar.jsx';
-import { fetchDayBreakdown } from '../../api/timingApi.js';
+import { getDayBreakdown } from '../../data/staticData.js';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
 export default function DayBreakdown({ audience, timezone, selectedDay, onDaySelect }) {
   const [activeDay, setActiveDay] = useState(selectedDay || 'Saturday');
-  const [breakdown, setBreakdown] = useState(null);
+  const [breakdown, setBreakdown] = useState([]);
 
   useEffect(() => {
     if (selectedDay) setActiveDay(selectedDay);
   }, [selectedDay]);
 
   useEffect(() => {
-    fetchDayBreakdown(audience, timezone, activeDay)
-      .then(d => setBreakdown(d))
-      .catch(() => {});
+    setBreakdown(getDayBreakdown(audience, timezone, activeDay));
   }, [audience, timezone, activeDay]);
 
   function handleDayClick(day) {
@@ -40,13 +38,11 @@ export default function DayBreakdown({ audience, timezone, selectedDay, onDaySel
         ))}
       </div>
 
-      {breakdown && (
-        <div className="hour-bars">
-          {breakdown.hours.map(h => (
-            <HourBar key={h.hour} hour={h} />
-          ))}
-        </div>
-      )}
+      <div className="hour-bars">
+        {breakdown.map(h => (
+          <HourBar key={h.hour} hour={h} />
+        ))}
+      </div>
     </section>
   );
 }
